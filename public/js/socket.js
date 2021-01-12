@@ -1,9 +1,11 @@
 export class Socket {
     constructor() {
-        this.users = [];
+        this.users = [window.poker.username];
+        this.refreshUsers();
     }
 
     open() {
+
         const isSSL = window.location.protocol === 'https:';
         this.socket = new WebSocket((isSSL ? "wss://" : "ws://") + window.location.host, "echo-protocol");
         this.socket.onopen = (event) => {
@@ -11,20 +13,50 @@ export class Socket {
             this.socket.send(JSON.stringify({
                 type: 'USER_JOINED',
                 body: {
-                    username: localStorage.getItem('username')
+                    username: window.poker.username
                 }
             }));
         }
         this.socket.onmessage = (event) => {
             const msg = JSON.parse(event.data);
-           switch (msg.type) {
-               case 'USER_JOINED':
-                   this.users.push(msg.body.username);
-                   this.refreshUsers();
-                   console.log(msg.body.username, 'has joined');
-                   break;
-           }
+            switch (msg.type) {
+                case 'USER_JOINED':
+                    this.handleUserJoined(msg);
+                    break;
+                case 'USER_GREETING':
+                    this.handleUserGreeting(msg);
+                    break;
+            }
         }
+    }
+
+    handleUserGreeting(msg) {
+        const myUsername = window.poker.username;
+        const hisUsername = msg.body.username;
+        if (myUsername !== hisUsername) {
+            this.users.push(msg.body.username);
+            this.refreshUsers();
+        }
+    }
+
+    handleUserJoined(msg) {
+        const myUsername = window.poker.username;
+        const hisUsername = msg.body.username;
+        if (myUsername !== hisUsername) {
+            this.users.push(hisUsername);
+            this.refreshUsers();
+            this.greetUser();
+            console.log(msg.body.username, 'has joined');
+        }
+    }
+
+    greetUser() {
+        this.socket.send(JSON.stringify({
+            type: 'USER_GREETING',
+            body: {
+                username: window.poker.username
+            }
+        }));
     }
 
     refreshUsers() {

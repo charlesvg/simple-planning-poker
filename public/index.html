@@ -68,8 +68,10 @@
         const username = document.getElementById('username').value;
         const room = document.getElementById('room').value;
         if (username && room) {
-            localStorage.setItem('username', username);
-            localStorage.setItem('room', room);
+            window.poker = {
+                username: username,
+                room: room
+            };
             document.getElementById('page-login').style.display = 'none';
             document.getElementById('page-poker').style.display = 'block';
 

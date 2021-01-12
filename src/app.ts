@@ -33,6 +33,7 @@ router.attachServer(wsServer);
 
 router.mount('*', 'echo-protocol', function(request) {
 
+
     const connection = request.accept(request.origin);
     console.log('Browser ' + connection.remoteAddress + ' connected.');
     browserConnections.push(connection);
@@ -41,7 +42,9 @@ router.mount('*', 'echo-protocol', function(request) {
 
     connection.on('message', function(message) {
         console.log('received', message);
-        connection.send(message.utf8Data);
+        browserConnections.forEach(conn => {
+            conn.send(message.utf8Data);
+        })
     });
 
     connection.on('close', function(reasonCode, description) {
