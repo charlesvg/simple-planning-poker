@@ -43,27 +43,52 @@
         <p class="lead">Poker planning</p>
     </main>
 
-    <div class="container">
-        <div class="row" id="users">
-<!--            <div class="col user rounded-top">Column</div>-->
-<!--            <div class="w-100"></div>-->
-
-<!--            <div class="col user">Column</div>-->
-<!--            <div class="w-100"></div>-->
-
-<!--            <div class="col user">Column</div>-->
-<!--            <div class="w-100"></div>-->
-
-<!--            <div class="col user rounded-bottom">Column</div>-->
-        </div>
+    <div class="container" id="users">
     </div>
     <br/>
-    <div class="container">
-        <button type="submit" class="btn btn-primary">Ready</button>
+    <div class="col d-flex justify-content-center">
+
+        <div class="container" style="width: 22rem;display: inline">
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" id="estimate" name="estimate" placeholder="P">
+                </div>
+                <div class="col-md-6">
+                    <button type="submit" class="btn btn-primary" onclick="sendEstimate();">Send</button>
+                </div>
+            </div>
+        </div>
+
+<!--        <div class="card" style="width: 22rem; margin-top: 50px">-->
+<!--            <div class="card-body">-->
+<!--                <h5 class="card-title">Welcome to planning poker</h5>-->
+<!--                <div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label for="username">Username</label>-->
+<!--                        <input type="text" class="form-control" id="username" name="username" placeholder="John">-->
+<!--                        <small id="emailHelp" class="form-text text-muted">This is the username people will see in-->
+<!--                            planning poker.</small>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label for="room">Room</label>-->
+<!--                        <select class="form-control" id="room" name="room">-->
+<!--                            <option>Grey goose team</option>-->
+<!--                            <option>Wild turkey team</option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                    <button type="button" class="btn btn-primary" onclick="login();">Poker!</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
     </div>
+
 
 </div>
 <script>
+    var sendEstimate = () => {
+        const estimate = document.getElementById('estimate').value;
+        window.socketClient.vote(estimate);
+    }
     var login = () => {
         const username = document.getElementById('username').value;
         const room = document.getElementById('room').value;
@@ -84,6 +109,7 @@
             script.src = 'js/client.js';
         }
     }
+
 
 
 </script>

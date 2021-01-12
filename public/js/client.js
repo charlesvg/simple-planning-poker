@@ -1,6 +1,5 @@
 import {Socket} from "./socket.js";
 
-(async () => {
-    const socket = new Socket();
-    socket.open();
-})()
+const socketClient = new Socket();
+socketClient.open();
+window.socketClient = socketClient;

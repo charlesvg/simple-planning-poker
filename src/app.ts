@@ -1,6 +1,8 @@
 import * as http from "http";
 import express = require('express');
 import httpRouter from "./router";
+import { v4 as uuidv4 } from 'uuid';
+import {strict} from "assert";
 
 const port = 8080;
 const WebSocketServer = require('websocket').server;
@@ -36,14 +38,36 @@ router.mount('*', 'echo-protocol', function(request) {
 
     const connection = request.accept(request.origin);
     console.log('Browser ' + connection.remoteAddress + ' connected.');
+
+
+    const uuid = uuidv4();
+    connection.send(JSON.stringify({
+        type: 'WELCOME',
+        body: {
+            uuid: uuid
+        }
+    }));
+    (connection as any).uuid = uuid;
+
+    browserConnections.forEach(conn => {
+        conn.send(JSON.stringify({
+            type: 'USER_CONNECTED',
+            body: {
+                uuid: uuid
+            }
+        }));
+    });
+
+
     browserConnections.push(connection);
 
 
-
     connection.on('message', function(message) {
-        console.log('received', message);
+        console.log('Received', JSON.parse(message.utf8Data));
         browserConnections.forEach(conn => {
-            conn.send(message.utf8Data);
+            if ((conn as any).uuid !== connection.uuid) {
+                conn.send(message.utf8Data);
+            }
         })
     });
 
@@ -51,13 +75,30 @@ router.mount('*', 'echo-protocol', function(request) {
 
         console.log('Browser ' + connection.remoteAddress + ' disconnected.');
 
+        const removed: Array<any> = [];
+
         browserConnections = browserConnections.filter((connection) => {
             const isOpen = connection.state === 'open';
             if (!isOpen) {
                 console.log('Removing stale browser connection, it is not open. Connection state =', connection.state);
+                removed.push((connection as any).uuid);
             }
             return isOpen;
         });
+
+
+
+        removed.forEach(removedUuid => {
+            browserConnections.forEach(conn => {
+                conn.send(JSON.stringify({
+                    type: 'USER_DISCONNECTED',
+                    body: {
+                        uuid: removedUuid
+                    }
+                }));
+            });
+        });
+
 
     });
 });
