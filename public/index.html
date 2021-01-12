@@ -1,0 +1,89 @@
+<html>
+<head>
+    <link rel='shortcut icon' type='image/x-icon' href='favicon.ico'/>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <style>
+        .user {
+            background-color: #fff;
+            border: 1px solid rgba(0,0,0,.125);
+            padding: .75rem 1.25rem;
+            margin-bottom: -1px;
+        }
+    </style>
+</head>
+<body>
+<div id="page-login">
+    <div class="col d-flex justify-content-center">
+        <div class="card" style="width: 22rem; margin-top: 50px">
+            <div class="card-body">
+                <h5 class="card-title">Welcome to planning poker</h5>
+                <div>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="John">
+                        <small id="emailHelp" class="form-text text-muted">This is the username people will see in
+                            planning poker.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="room">Room</label>
+                        <select class="form-control" id="room" name="room">
+                            <option>Grey goose team</option>
+                            <option>Wild turkey team</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="login();">Poker!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="page-poker" style="display:none">
+    <main role="main" class="container">
+        <h1 class="mt-5"><span id="room-name"></span></h1>
+        <p class="lead">Poker planning</p>
+    </main>
+
+    <div class="container">
+        <div class="row" id="users">
+<!--            <div class="col user rounded-top">Column</div>-->
+<!--            <div class="w-100"></div>-->
+
+<!--            <div class="col user">Column</div>-->
+<!--            <div class="w-100"></div>-->
+
+<!--            <div class="col user">Column</div>-->
+<!--            <div class="w-100"></div>-->
+
+<!--            <div class="col user rounded-bottom">Column</div>-->
+        </div>
+    </div>
+    <br/>
+    <div class="container">
+        <button type="submit" class="btn btn-primary">Ready</button>
+    </div>
+
+</div>
+<script>
+    var login = () => {
+        const username = document.getElementById('username').value;
+        const room = document.getElementById('room').value;
+        if (username && room) {
+            localStorage.setItem('username', username);
+            localStorage.setItem('room', room);
+            document.getElementById('page-login').style.display = 'none';
+            document.getElementById('page-poker').style.display = 'block';
+
+            document.getElementById('room-name').textContent = room;
+
+            const script = document.createElement('script');
+            document.body.appendChild(script);
+            script.async = true;
+            script.type = 'module';
+            script.src = 'js/client.js';
+        }
+    }
+
+
+</script>
+</body>
+</html>
