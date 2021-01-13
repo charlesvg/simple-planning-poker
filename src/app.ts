@@ -1,8 +1,7 @@
 import * as http from "http";
 import express = require('express');
 import httpRouter from "./router";
-import { v4 as uuidv4 } from 'uuid';
-import {strict} from "assert";
+import {PokerServer} from "./server";
 
 const port = 8080;
 const WebSocketServer = require('websocket').server;
@@ -11,7 +10,7 @@ const WebSocketRouter = require('websocket').router;
 const app = express();
 const server = http.createServer(app);
 
-let browserConnections: Array<any> = [];
+
 
 app.use(express.static('./public/'));
 app.use('/', httpRouter);
@@ -33,74 +32,14 @@ let wsServer = new WebSocketServer({
 const router = new WebSocketRouter();
 router.attachServer(wsServer);
 
+const pokerServer = new PokerServer();
+
 router.mount('*', 'echo-protocol', function(request) {
-
-
     const connection = request.accept(request.origin);
     console.log('Browser ' + connection.remoteAddress + ' connected.');
-
-
-    const uuid = uuidv4();
-    connection.send(JSON.stringify({
-        type: 'WELCOME',
-        body: {
-            uuid: uuid
-        }
-    }));
-    (connection as any).uuid = uuid;
-
-    browserConnections.forEach(conn => {
-        conn.send(JSON.stringify({
-            type: 'USER_CONNECTED',
-            body: {
-                uuid: uuid
-            }
-        }));
-    });
-
-
-    browserConnections.push(connection);
-
-
-    connection.on('message', function(message) {
-        console.log('Received', JSON.parse(message.utf8Data));
-        browserConnections.forEach(conn => {
-            if ((conn as any).uuid !== connection.uuid) {
-                conn.send(message.utf8Data);
-            }
-        })
-    });
-
-    connection.on('close', function(reasonCode, description) {
-
-        console.log('Browser ' + connection.remoteAddress + ' disconnected.');
-
-        const removed: Array<any> = [];
-
-        browserConnections = browserConnections.filter((connection) => {
-            const isOpen = connection.state === 'open';
-            if (!isOpen) {
-                console.log('Removing stale browser connection, it is not open. Connection state =', connection.state);
-                removed.push((connection as any).uuid);
-            }
-            return isOpen;
-        });
-
-
-
-        removed.forEach(removedUuid => {
-            browserConnections.forEach(conn => {
-                conn.send(JSON.stringify({
-                    type: 'USER_DISCONNECTED',
-                    body: {
-                        uuid: removedUuid
-                    }
-                }));
-            });
-        });
-
-
-    });
+    pokerServer.onConnected(connection);
+    connection.on('message', (message) => pokerServer.onMessage(connection, message));
+    connection.on('close', (reasonCode, description) => pokerServer.onClosed(connection, reasonCode, description));
 });
 
 
