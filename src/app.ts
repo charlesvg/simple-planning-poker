@@ -1,7 +1,7 @@
 import * as http from "http";
 import express = require('express');
 import httpRouter from "./router";
-import {PokerServer} from "./server";
+import {PokerServer} from "./poker-server";
 
 const port = 8080;
 const WebSocketServer = require('websocket').server;
