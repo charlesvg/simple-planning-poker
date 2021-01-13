@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 export class PokerServer {
     private browserConnections: Array<any> = [];
+
     public onConnected(connection) {
 
         const uuid = uuidv4();
