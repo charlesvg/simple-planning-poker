@@ -3,6 +3,7 @@ export class Socket {
         this.username = window.poker.username;
         this.room = window.poker.room;
         this.users = new Map();
+        this.uuid = '';
     }
 
     open() {
@@ -81,7 +82,8 @@ export class Socket {
     onUserGreeting(body) {
         this.users.set(body.uuid, {
             username: body.username,
-            room: body.room
+            room: body.room,
+            estimate: body.estimate
         });
         this.refreshUsers();
     }
@@ -102,7 +104,8 @@ export class Socket {
         this.send('USER_GREETING', {
             username: this.username,
             uuid: this.uuid,
-            room: this.room
+            room: this.room,
+            estimate: this.users.get(this.uuid).estimate
         });
     }
 
