@@ -2,8 +2,9 @@ export class Socket {
     constructor() {
         this.username = window.poker.username;
         this.room = window.poker.room;
-        this.users = new Map();
+        this.clients = new Map();
         this.uuid = '';
+        this.sharedState = {};
     }
 
     open() {
@@ -19,11 +20,11 @@ export class Socket {
                 case 'WELCOME':
                     this.onWelcome(msg.body);
                     break;
-                case 'USER_CONNECTED':
-                    this.onUserConnected(msg.body);
+                case 'CLIENT_CONNECTED_CONNECTED':
+                    this.onClientConnected(msg.body);
                     break;
-                case 'USER_DISCONNECTED':
-                    this.onUserDisconnected(msg.body);
+                case 'CLIENT_DISCONNECTED':
+                    this.onClientDisconnected(msg.body);
                     break;
                 case 'USER_JOINED':
                     this.onUserJoined(msg.body);
@@ -41,20 +42,20 @@ export class Socket {
 
 
     onEstimate(body) {
-        const userDetails = this.users.get(body.uuid);
+        const userDetails = this.clients.get(body.uuid);
         userDetails.estimate = body.estimate;
 
         this.refreshUsers();
     }
 
-    onUserDisconnected(body) {
-        this.users.delete(body.uuid);
+    onClientDisconnected(body) {
+        this.clients.delete(body.uuid);
         this.refreshUsers();
     }
 
     onWelcome(body) {
         this.uuid = body.uuid;
-        this.users.set(body.uuid, {
+        this.clients.set(body.uuid, {
             username: this.username,
             room: this.room
         });
@@ -80,7 +81,7 @@ export class Socket {
     }
 
     onUserGreeting(body) {
-        this.users.set(body.uuid, {
+        this.clients.set(body.uuid, {
             username: body.username,
             room: body.room,
             estimate: body.estimate
@@ -88,12 +89,12 @@ export class Socket {
         this.refreshUsers();
     }
 
-    onUserConnected(body) {
-        this.users.set(body.uuid, {});
+    onClientConnected(body) {
+        this.clients.set(body.uuid, {});
     }
 
     onUserJoined(body) {
-        const userDetails = this.users.get(body.uuid);
+        const userDetails = this.clients.get(body.uuid);
         userDetails.room = body.room;
         userDetails.username = body.username;
         this.refreshUsers();
@@ -105,12 +106,12 @@ export class Socket {
             username: this.username,
             uuid: this.uuid,
             room: this.room,
-            estimate: this.users.get(this.uuid).estimate
+            estimate: this.clients.get(this.uuid).estimate
         });
     }
 
     vote(estimate) {
-        const userDetails = this.users.get(this.uuid);
+        const userDetails = this.clients.get(this.uuid);
         userDetails.estimate = estimate;
         this.refreshUsers();
         this.send('ESTIMATE', {
@@ -132,7 +133,7 @@ export class Socket {
                                 <div class="col-md-6 user"><strong>Estimate</strong></div>
                             </div>
         `;
-        for (let [uuid, userDetails] of this.users) {
+        for (let [uuid, userDetails] of this.clients) {
             if (userDetails.room === this.room) {
                 output +=
                         `

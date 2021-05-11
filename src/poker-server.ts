@@ -15,7 +15,7 @@ export class PokerServer {
 
         this.browserConnections.forEach(conn => {
             conn.send(JSON.stringify({
-                type: 'USER_CONNECTED',
+                type: 'CLIENT_CONNECTED',
                 body: {
                     uuid: uuid
                 }
@@ -53,7 +53,7 @@ export class PokerServer {
         removed.forEach(removedUuid => {
             this.browserConnections.forEach(conn => {
                 conn.send(JSON.stringify({
-                    type: 'USER_DISCONNECTED',
+                    type: 'CLIENT_DISCONNECTED',
                     body: {
                         uuid: removedUuid
                     }
