@@ -50,11 +50,14 @@
 
         <div class="container" style="width: 22rem;display: inline">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <input type="text" class="form-control" id="estimate" name="estimate" placeholder="P">
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <button type="submit" class="btn btn-primary" onclick="sendEstimate();">Send</button>
+                </div>
+                <div class="col-md-4">
+                    <input type="checkbox" class="form-check-input" onclick="toggleHost(this.checked);">I am the host</input>
                 </div>
             </div>
         </div>
@@ -88,6 +91,9 @@
     var sendEstimate = () => {
         const estimate = document.getElementById('estimate').value;
         window.socketClient.vote(estimate);
+    }
+    var toggleHost = (isHost) => {
+        window.socketClient.toggleHost(isHost);
     }
     var login = () => {
         const username = document.getElementById('username').value;

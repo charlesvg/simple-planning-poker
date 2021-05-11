@@ -1,10 +1,11 @@
 export class Socket {
     constructor() {
-        this.username = window.poker.username;
-        this.room = window.poker.room;
-        this.clients = new Map();
-        this.uuid = '';
-        this.sharedState = {};
+        this.peers = new Map();
+        this.state = {
+            username: window.poker.username,
+            room: window.poker.room,
+            uuid: undefined
+        };
     }
 
     open() {
@@ -18,109 +19,77 @@ export class Socket {
             console.log('Receive', msg);
             switch (msg.type) {
                 case 'WELCOME':
-                    this.onWelcome(msg.body);
+                    this.onConnected(msg.body);
                     break;
-                case 'CLIENT_CONNECTED_CONNECTED':
-                    this.onClientConnected(msg.body);
+                case 'STATE':
+                    this.onState(msg);
                     break;
-                case 'CLIENT_DISCONNECTED':
-                    this.onClientDisconnected(msg.body);
+                case 'PEER_CONNECTED':
+                    this.onPeerConnected(msg.body);
                     break;
-                case 'USER_JOINED':
-                    this.onUserJoined(msg.body);
-                    break;
-                case 'USER_GREETING':
-                    this.onUserGreeting(msg.body);
-                    break;
-                case 'ESTIMATE':
-                    this.onEstimate(msg.body);
+                case 'PEER_DISCONNECTED':
+                    this.onPeerDisconnected(msg.body);
                     break;
             }
         }
 
     }
 
-
-    onEstimate(body) {
-        const userDetails = this.clients.get(body.uuid);
-        userDetails.estimate = body.estimate;
-
+    onPeerConnected(body) {
+        this.peers.set(body.uuid, {});
+        this.sendTo(body.uuid);
         this.refreshUsers();
     }
 
-    onClientDisconnected(body) {
-        this.clients.delete(body.uuid);
+    onPeerDisconnected(body) {
+        this.peers.delete(body.uuid);
         this.refreshUsers();
     }
 
-    onWelcome(body) {
-        this.uuid = body.uuid;
-        this.clients.set(body.uuid, {
-            username: this.username,
-            room: this.room
-        });
-        this.refreshUsers();
+    onState(msg) {
+        if (!this.peers.get(msg.source)) {
+            this.sendTo(msg.source);
+        }
 
-        this.send('USER_JOINED', {
-            username: this.username,
-            uuid: this.uuid,
-            room: this.room
-        });
-    }
-
-
-    send(type, content) {
-        this.socket.send(JSON.stringify({
-            type: type,
-            body: content
-        }));
-    }
-
-    now() {
-        return new Date().getTime();
-    }
-
-    onUserGreeting(body) {
-        this.clients.set(body.uuid, {
-            username: body.username,
-            room: body.room,
-            estimate: body.estimate
-        });
+        this.peers.set(msg.source, msg.state);
         this.refreshUsers();
     }
 
-    onClientConnected(body) {
-        this.clients.set(body.uuid, {});
-    }
 
-    onUserJoined(body) {
-        const userDetails = this.clients.get(body.uuid);
-        userDetails.room = body.room;
-        userDetails.username = body.username;
+    onConnected(body) {
+        this.state.uuid = body.uuid;
         this.refreshUsers();
-        this.greetUser();
-    }
-
-    greetUser() {
-        this.send('USER_GREETING', {
-            username: this.username,
-            uuid: this.uuid,
-            room: this.room,
-            estimate: this.clients.get(this.uuid).estimate
-        });
     }
 
     vote(estimate) {
-        const userDetails = this.clients.get(this.uuid);
-        userDetails.estimate = estimate;
+        this.state.estimate = estimate;
+        for (let uuid of this.peers.keys()) {
+            this.sendTo(uuid);
+        }
         this.refreshUsers();
-        this.send('ESTIMATE', {
-            uuid: this.uuid,
-            estimate: estimate
-        });
     }
 
+    toggleHost(isHost) {
+        this.state.isHost = isHost;
+        for (let uuid of this.peers.keys()) {
+            this.sendTo(uuid);
+        }
+        this.refreshUsers();
+    }
+
+    sendTo(target) {
+        this.socket.send(JSON.stringify({
+            type: 'STATE',
+            target: target,
+            source: this.state.uuid,
+            state: this.state
+        }));
+    }
+
+
     refreshUsers() {
+
+
         const usersElement = document.getElementById('users');
 
         while (usersElement.firstChild) {
@@ -132,19 +101,22 @@ export class Socket {
                                 <div class="col-md-6 user"><strong>Username</strong></div>
                                 <div class="col-md-6 user"><strong>Estimate</strong></div>
                             </div>
-        `;
-        for (let [uuid, userDetails] of this.clients) {
-            if (userDetails.room === this.room) {
-                output +=
-                        `
                             <div class="row">
-                                <div class="col-md-6 user">${userDetails.username}</div>
-                                <div class="col-md-6 user">${userDetails.estimate ? userDetails.estimate : '?'}</div>
+                                <div class="col-md-6 user">${this.state.username + (this.state.isHost ? ' (host)' : '')}</div>
+                                <div class="col-md-6 user">${this.state.estimate ? this.state.estimate : '?'}</div>
+                            </div>
+        `;
+        for (let [uuid, state] of this.peers) {
+            if (state.room === this.state.room) {
+                output +=
+                    `
+                            <div class="row">
+                                <div class="col-md-6 user">${state.username + (state.isHost ? ' (host)' : '')}</div>
+                                <div class="col-md-6 user">${state.estimate ? state.estimate : '?'}</div>
                             </div>
                         `;
             }
         }
         usersElement.innerHTML = output;
-
     }
 }

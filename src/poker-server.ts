@@ -15,7 +15,7 @@ export class PokerServer {
 
         this.browserConnections.forEach(conn => {
             conn.send(JSON.stringify({
-                type: 'CLIENT_CONNECTED',
+                type: 'PEER_CONNECTED',
                 body: {
                     uuid: uuid
                 }
@@ -26,9 +26,11 @@ export class PokerServer {
         this.browserConnections.push(connection);
     }
     public onMessage(connection, message) {
-        console.log('Received', JSON.parse(message.utf8Data));
+        const parsedMessage = JSON.parse(message.utf8Data);
+        console.log('Received', parsedMessage);
         this.browserConnections.forEach(conn => {
-            if ((conn as any).uuid !== connection.uuid) {
+            if ((conn as any).uuid == parsedMessage.target) {
+                console.log('sent', parsedMessage);
                 conn.send(message.utf8Data);
             }
         })
@@ -53,7 +55,7 @@ export class PokerServer {
         removed.forEach(removedUuid => {
             this.browserConnections.forEach(conn => {
                 conn.send(JSON.stringify({
-                    type: 'CLIENT_DISCONNECTED',
+                    type: 'PEER_DISCONNECTED',
                     body: {
                         uuid: removedUuid
                     }
