@@ -38,11 +38,11 @@
                         <input type="checkbox" class="form-check-input" id="scrummaster">
                         <label class="form-check-label" for="scrummaster">Scrum master</label>
                     </div>
-<!--                    <div class="form-group">-->
-<!--                        <label for="host">Scrum master</label>-->
-<!--                        <input type="checkbox" class="form-control" id="host" name="host">-->
-<!--                        <small id="hostHelp" class="form-text text-muted">Check this if you are the scrum master</small>-->
-<!--                    </div>-->
+                    <!--                    <div class="form-group">-->
+                    <!--                        <label for="host">Scrum master</label>-->
+                    <!--                        <input type="checkbox" class="form-control" id="host" name="host">-->
+                    <!--                        <small id="hostHelp" class="form-text text-muted">Check this if you are the scrum master</small>-->
+                    <!--                    </div>-->
                     <button type="button" class="btn btn-primary" onclick="login();">Poker!</button>
                 </div>
             </div>
@@ -55,46 +55,25 @@
         <p class="lead">Poker planning</p>
     </main>
 
-    <div class="input-group mb-3">
-        <div class="input-group-prepend">
-            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="#">Action</a>
-                <a class="dropdown-item" href="#">Another action</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-                <div role="separator" class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#">Separated link</a>
-            </div>
-        </div>
-        <input type="text" class="form-control" aria-label="Text input with dropdown button">
-        <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button">Estimate</button>
-        </div>
-    </div>
 
     <br/>
     <div class="container">
         <div class="row">
-            <div class="col-md-2">
-                <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-<!--                    <button type="button" class="btn btn-secondary">1</button>-->
-<!--                    <button type="button" class="btn btn-secondary">2</button>-->
-
-                    <div class="btn-group" role="group">
-                        <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle disabled"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Actions
+            <div class="col-md-12">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <button id="btnGroupDrop1" class="btn btn-outline-primary dropdown-toggle disabled" type="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions
                         </button>
-                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                            <a class="dropdown-item" href="#">Show estimates</a>
-                            <a class="dropdown-item" href="#">Reset estimates</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#" onclick="showEstimates();">Show estimates</a>
+                            <a class="dropdown-item" href="#" onclick="resetEstimates();">Reset estimates</a>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-10">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button">Button</button>
+                    <input type="text" class="form-control"  id="estimate" name="estimate" aria-label="Your estimate" placeholder="Your estimate">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-primary" type="button" onclick="sendEstimate();">Estimate</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -106,52 +85,7 @@
         </div>
 
     </div>
-    <br/>
-    <div class="col d-flex justify-content-center">
 
-        <div class="container" style="width: 44rem;display: inline; border: 1px solid black;">
-            <div class="row">
-                <div class="col-md-2">
-                    <input type="text" class="form-control" id="estimate" name="estimate" placeholder="P">
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary" onclick="sendEstimate();">Send</button>
-                </div>
-                <div class="col-md-4">
-                    <input type="checkbox" class="form-check-input" onclick="toggleHost(this.checked);">I am the
-                    host</input>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary" onclick="showEstimates();">Show</button>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary" onclick="resetEstimates();">Reset</button>
-                </div>
-            </div>
-        </div>
-
-        <!--        <div class="card" style="width: 22rem; margin-top: 50px">-->
-        <!--            <div class="card-body">-->
-        <!--                <h5 class="card-title">Welcome to planning poker</h5>-->
-        <!--                <div>-->
-        <!--                    <div class="form-group">-->
-        <!--                        <label for="username">Username</label>-->
-        <!--                        <input type="text" class="form-control" id="username" name="username" placeholder="John">-->
-        <!--                        <small id="emailHelp" class="form-text text-muted">This is the username people will see in-->
-        <!--                            planning poker.</small>-->
-        <!--                    </div>-->
-        <!--                    <div class="form-group">-->
-        <!--                        <label for="room">Room</label>-->
-        <!--                        <select class="form-control" id="room" name="room">-->
-        <!--                            <option>Grey goose team</option>-->
-        <!--                            <option>Wild turkey team</option>-->
-        <!--                        </select>-->
-        <!--                    </div>-->
-        <!--                    <button type="button" class="btn btn-primary" onclick="login();">Poker!</button>-->
-        <!--                </div>-->
-        <!--            </div>-->
-        <!--        </div>-->
-    </div>
 
 
 </div>
