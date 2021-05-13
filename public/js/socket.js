@@ -1,10 +1,18 @@
 export class Socket {
     constructor() {
         this.peers = new Map();
+        this.privateState = {
+            estimate: undefined
+        };
         this.state = {
             username: window.poker.username,
             room: window.poker.room,
-            uuid: undefined
+            uuid: undefined,
+            estimate: undefined,
+            isEstimateReady: false,
+            isHost: false,
+            shouldShowEstimates: false,
+            shouldResetEstimates: false
         };
     }
 
@@ -52,6 +60,25 @@ export class Socket {
         }
 
         this.peers.set(msg.source, msg.state);
+
+        if (msg.state.shouldShowEstimates) {
+            this.state.estimate = this.privateState.estimate;
+            for (let uuid of this.peers.keys()) {
+                this.sendTo(uuid);
+            }
+        } else if (msg.state.shouldResetEstimates) { {
+                this.state.shouldShowEstimates = false;
+                this.state.isEstimateReady = false;
+                this.privateState.estimate = undefined;
+                this.state.estimate = undefined;
+                for (let [uuid, peerState] of this.peers) {
+                    peerState.shouldShowEstimates = false;
+                    peerState.isEstimateReady = false;
+                    peerState.estimate = undefined;
+                }
+            }
+        }
+
         this.refreshUsers();
     }
 
@@ -60,9 +87,36 @@ export class Socket {
         this.state.uuid = body.uuid;
         this.refreshUsers();
     }
+    resetEstimates() {
+        this.state.shouldShowEstimates = false;
+        this.state.isEstimateReady = false;
+        this.privateState.estimate = undefined;
+        this.state.estimate = undefined;
+        this.state.shouldResetEstimates = true;
+        for (let uuid of this.peers.keys()) {
+            this.sendTo(uuid);
+        }
+        this.state.shouldResetEstimates = false;
+        for (let [uuid, peerState] of this.peers) {
+            peerState.shouldShowEstimates = false;
+            peerState.isEstimateReady = false;
+            peerState.estimate = undefined;
+        }
+        this.refreshUsers();
+    }
+
+    showEstimates() {
+        this.state.shouldShowEstimates = true;
+        this.state.estimate = this.privateState.estimate;
+        for (let uuid of this.peers.keys()) {
+            this.sendTo(uuid);
+        }
+        this.refreshUsers();
+    }
 
     vote(estimate) {
-        this.state.estimate = estimate;
+        this.privateState.estimate = estimate;
+        this.state.isEstimateReady = true;
         for (let uuid of this.peers.keys()) {
             this.sendTo(uuid);
         }
@@ -103,7 +157,7 @@ export class Socket {
                             </div>
                             <div class="row">
                                 <div class="col-md-6 user">${this.state.username + (this.state.isHost ? ' (host)' : '')}</div>
-                                <div class="col-md-6 user">${this.state.estimate ? this.state.estimate : '?'}</div>
+                                <div class="col-md-6 user">${this.privateState.estimate ? this.privateState.estimate : '?'}</div>
                             </div>
         `;
         for (let [uuid, state] of this.peers) {
@@ -112,7 +166,7 @@ export class Socket {
                     `
                             <div class="row">
                                 <div class="col-md-6 user">${state.username + (state.isHost ? ' (host)' : '')}</div>
-                                <div class="col-md-6 user">${state.estimate ? state.estimate : '?'}</div>
+                                <div class="col-md-6 user">${state.estimate ? state.estimate : (state.isEstimateReady ? 'Ready' : '?')}</div>
                             </div>
                         `;
             }
