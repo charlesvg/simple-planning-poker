@@ -147,12 +147,13 @@ export class Socket {
                                 <div class="col-md-6 user"><strong>Username</strong></div>
                                 <div class="col-md-6 user"><strong>Estimate</strong></div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-6 user">${this.state.username + (this.state.isScrumMaster ? '*' : '')}</div>
-                                <div class="col-md-6 user">${this.privateState.estimate ? this.privateState.estimate : '?'}</div>
-                            </div>
         `;
-        for (let [uuid, state] of this.peers) {
+
+        const list = Array.from(this.peers.values());
+        list.push(this.state);
+        list.sort((a,b) => (a.username || '').localeCompare(b.username || ''));
+
+        for (let state of list) {
             if (state.room === this.state.room) {
                 output +=
                     `
