@@ -7,10 +7,10 @@ export class Socket {
         this.state = {
             username: window.poker.username,
             room: window.poker.room,
+            isScrumMaster: window.poker.isScrumMaster,
             uuid: undefined,
             estimate: undefined,
             isEstimateReady: false,
-            isHost: false,
             shouldShowEstimates: false,
             shouldResetEstimates: false
         };
@@ -123,14 +123,6 @@ export class Socket {
         this.refreshUsers();
     }
 
-    toggleHost(isHost) {
-        this.state.isHost = isHost;
-        for (let uuid of this.peers.keys()) {
-            this.sendTo(uuid);
-        }
-        this.refreshUsers();
-    }
-
     sendTo(target) {
         this.socket.send(JSON.stringify({
             type: 'STATE',
@@ -156,7 +148,7 @@ export class Socket {
                                 <div class="col-md-6 user"><strong>Estimate</strong></div>
                             </div>
                             <div class="row">
-                                <div class="col-md-6 user">${this.state.username + (this.state.isHost ? ' (host)' : '')}</div>
+                                <div class="col-md-6 user">${this.state.username + (this.state.isScrumMaster ? '*' : '')}</div>
                                 <div class="col-md-6 user">${this.privateState.estimate ? this.privateState.estimate : '?'}</div>
                             </div>
         `;
@@ -165,7 +157,7 @@ export class Socket {
                 output +=
                     `
                             <div class="row">
-                                <div class="col-md-6 user">${state.username + (state.isHost ? ' (host)' : '')}</div>
+                                <div class="col-md-6 user">${state.username + (state.isScrumMaster ? '*' : '')}</div>
                                 <div class="col-md-6 user">${state.estimate ? state.estimate : (state.isEstimateReady ? 'Ready' : '?')}</div>
                             </div>
                         `;
