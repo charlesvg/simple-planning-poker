@@ -70,7 +70,7 @@
                             <a class="dropdown-item" href="#" onclick="resetEstimates();">Reset estimates</a>
                         </div>
                     </div>
-                    <input type="text" class="form-control"  id="estimate" name="estimate" aria-label="Your estimate" placeholder="Your estimate">
+                    <input type="number" class="form-control"  id="estimate" name="estimate" aria-label="Your estimate" placeholder="Your estimate">
                     <div class="input-group-append">
                         <button class="btn btn-outline-primary" type="button" onclick="sendEstimate();">Estimate</button>
                     </div>
@@ -98,7 +98,10 @@
     }
     var sendEstimate = () => {
         const estimate = document.getElementById('estimate').value;
-        window.socketClient.vote(estimate);
+        const parsedEstimate = parseInt(estimate);
+        if (parsedEstimate) {
+            window.socketClient.vote(parsedEstimate);
+        }
     }
     var toggleHost = (isHost) => {
         window.socketClient.toggleHost(isHost);
