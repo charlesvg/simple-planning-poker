@@ -63,19 +63,10 @@ export class Socket {
 
         if (msg.state.shouldShowEstimates) {
             this.state.estimate = this.privateState.estimate;
-            for (let uuid of this.peers.keys()) {
-                this.sendTo(uuid);
-            }
+            this.sync();
         } else if (msg.state.shouldResetEstimates) { {
-                this.state.shouldShowEstimates = false;
-                this.state.isEstimateReady = false;
-                this.privateState.estimate = undefined;
-                this.state.estimate = undefined;
-                for (let [uuid, peerState] of this.peers) {
-                    peerState.shouldShowEstimates = false;
-                    peerState.isEstimateReady = false;
-                    peerState.estimate = undefined;
-                }
+                this.resetState();
+                this.resetPeerStates();
             }
         }
 
@@ -87,40 +78,51 @@ export class Socket {
         this.state.uuid = body.uuid;
         this.refreshUsers();
     }
-    resetEstimates() {
+
+    resetState() {
         this.state.shouldShowEstimates = false;
         this.state.isEstimateReady = false;
-        this.privateState.estimate = undefined;
         this.state.estimate = undefined;
-        this.state.shouldResetEstimates = true;
-        for (let uuid of this.peers.keys()) {
-            this.sendTo(uuid);
-        }
-        this.state.shouldResetEstimates = false;
+
+        this.privateState.estimate = undefined;
+    }
+    resetPeerStates() {
         for (let [uuid, peerState] of this.peers) {
             peerState.shouldShowEstimates = false;
             peerState.isEstimateReady = false;
             peerState.estimate = undefined;
         }
+
+    }
+
+    resetEstimates() {
+        this.resetState();
+
+        this.state.shouldResetEstimates = true;
+        this.sync();
+        this.state.shouldResetEstimates = false;
+        this.resetPeerStates()
         this.refreshUsers();
     }
 
     showEstimates() {
         this.state.shouldShowEstimates = true;
         this.state.estimate = this.privateState.estimate;
-        for (let uuid of this.peers.keys()) {
-            this.sendTo(uuid);
-        }
+        this.sync();
         this.refreshUsers();
     }
 
     vote(estimate) {
         this.privateState.estimate = estimate;
         this.state.isEstimateReady = true;
+        this.sync();
+        this.refreshUsers();
+    }
+
+    sync() {
         for (let uuid of this.peers.keys()) {
             this.sendTo(uuid);
         }
-        this.refreshUsers();
     }
 
     sendTo(target) {
